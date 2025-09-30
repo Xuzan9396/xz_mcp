@@ -126,11 +126,42 @@ chmod +x xz_mcp
 sudo mv xz_mcp /usr/local/bin/
 ```
 
+#### Windows (PowerShell)
+
+```powershell
+# 下载
+Invoke-WebRequest -Uri "https://github.com/Xuzan9396/xz_mcp/releases/latest/download/xz_mcp_windows_amd64.exe" -OutFile "xz_mcp.exe"
+
+# 移动到合适的位置（例如）
+Move-Item xz_mcp.exe C:\Users\$env:USERNAME\go\bin\xz_mcp.exe
+```
+
+#### Windows 配置
+
+**Codex** (`%USERPROFILE%\.codex\config.toml`):
+```toml
+[mcp_servers.xz_mcp]
+command = "C:\\Users\\YourUsername\\go\\bin\\xz_mcp.exe"
+```
+
+**Claude Desktop** (`%APPDATA%\Claude\claude_desktop_config.json`):
+```json
+{
+  "mcpServers": {
+    "xz_mcp": {
+      "command": "C:\\Users\\YourUsername\\go\\bin\\xz_mcp.exe",
+      "args": [],
+      "env": {}
+    }
+  }
+}
+```
+
 ### 方式3：从源码编译
 
 #### 前置要求
 - Go 1.21 或更高版本
-- GCC 编译器（用于 SQLite CGO 支持）
+- 项目使用纯 Go SQLite 驱动（modernc.org/sqlite），无需 CGO
 
 #### 使用编译脚本（推荐）
 

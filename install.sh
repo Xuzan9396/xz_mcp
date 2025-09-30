@@ -12,7 +12,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # 配置
-REPO="yourname/xz_mcp"  # 修改为你的 GitHub 仓库
+REPO="Xuzan9396/xz_mcp"
 INSTALL_DIR="${HOME}/go/bin"
 BINARY_NAME="xz_mcp"
 
@@ -24,6 +24,24 @@ echo ""
 # 检测操作系统和架构
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
+
+# 检查是否是 Windows (Git Bash/WSL)
+if [[ "$OS" == *"mingw"* ]] || [[ "$OS" == *"msys"* ]] || [[ "$OS" == *"cygwin"* ]]; then
+    echo -e "${YELLOW}检测到 Windows 系统${NC}"
+    echo ""
+    echo "请使用 PowerShell 运行以下命令："
+    echo ""
+    echo "  Invoke-WebRequest -Uri \"https://github.com/Xuzan9396/xz_mcp/releases/latest/download/xz_mcp_windows_amd64.exe\" -OutFile \"xz_mcp.exe\""
+    echo ""
+    echo "然后移动到合适的位置，例如："
+    echo "  Move-Item xz_mcp.exe C:\Users\\\$env:USERNAME\go\bin\xz_mcp.exe"
+    echo ""
+    echo "配置 Codex (~/.codex/config.toml):"
+    echo "  [mcp_servers.xz_mcp]"
+    echo "  command = \"C:\\\\Users\\\\YourUsername\\\\go\\\\bin\\\\xz_mcp.exe\""
+    echo ""
+    exit 0
+fi
 
 case $ARCH in
     x86_64)
