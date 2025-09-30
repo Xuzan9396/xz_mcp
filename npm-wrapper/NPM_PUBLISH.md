@@ -71,7 +71,7 @@ npm publish
 npm view @xuzan/xz-mcp
 
 # 测试安装
-npx @xuzan/xz-mcp
+npx -y @xuzan/xz-mcp
 ```
 
 ## 🔄 更新版本
@@ -120,7 +120,7 @@ npm-wrapper/
 
 ## 🎯 工作原理
 
-1. **用户执行**: `npx @xuzan/xz-mcp`
+1. **用户执行**: `npx -y @xuzan/xz-mcp`
 2. **npm 下载**: npm-wrapper 包（仅包含 JS 脚本，约 10KB）
 3. **postinstall**: 自动从 GitHub Releases 下载对应平台的二进制文件
 4. **启动**: `bin/xz-mcp.js` 启动下载的二进制文件
@@ -176,7 +176,7 @@ npm whoami
 - [ ] 本地测试启动成功
 - [ ] 执行 `npm publish --access public`
 - [ ] 验证 `npm view @xuzan/xz-mcp`
-- [ ] 测试 `npx @xuzan/xz-mcp`
+- [ ] 测试 `npx -y @xuzan/xz-mcp`
 
 ## 🎉 首次发布完整流程
 
@@ -213,7 +213,7 @@ npm publish --access public
 npm publish
 
 # 7. 验证
-npx @xuzan/xz-mcp
+npx -y @xuzan/xz-mcp
 
 # 8.查看版本
  npm view @xuzan/xz-mcp version
@@ -222,4 +222,4 @@ npx @xuzan/xz-mcp
 npm view @xuzan/xz-mcp
 ```
 
-完成！用户现在可以通过 `npx @xuzan/xz-mcp` 直接使用你的 MCP 服务器了！
+完成！用户现在可以通过 `npx -y @xuzan/xz-mcp` 直接使用你的 MCP 服务器了！

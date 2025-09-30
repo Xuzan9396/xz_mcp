@@ -11,7 +11,7 @@
 无需安装，直接使用：
 
 ```bash
-npx @xuzan/xz-mcp
+npx -y @xuzan/xz-mcp
 ```
 
 ### 全局安装
@@ -33,7 +33,8 @@ npm install @xuzan/xz-mcp
 添加到 Claude Desktop 配置：
 
 ```bash
-claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"npx","args":["@xuzan/xz-mcp"],"env":{}}'
+claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"npx","args":["-y","@xuzan/xz-mcp"],"env":{}}'
+claude mcp add-json test_mcp -s user '{"type":"stdio","command":"npx","args":["-y","@xuzan/xz-mcp"],"env":{}}'
 ```
 
 或者手动编辑配置文件：
@@ -46,7 +47,7 @@ claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"npx","args":["@xu
   "mcpServers": {
     "xz_mcp": {
       "command": "npx",
-      "args": ["@xuzan/xz-mcp"]
+      "args": ["-y", "@xuzan/xz-mcp"]
     }
   }
 }
@@ -59,7 +60,7 @@ claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"npx","args":["@xu
 ```toml
 [mcp_servers.xz_mcp]
 command = "npx"
-args = ["@xuzan/xz-mcp"]
+args = ["-y", "@xuzan/xz-mcp"]
 ```
 
 ## ✨ 功能特性

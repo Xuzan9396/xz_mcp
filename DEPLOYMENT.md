@@ -92,10 +92,10 @@ npm publish --access public
 
 ```bash
 # 直接运行（自动下载最新版本）
-npx @xuzan/xz-mcp
+npx -y @xuzan/xz-mcp
 
 # Claude Desktop 配置
-claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"npx","args":["@xuzan/xz-mcp"],"env":{}}'
+claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"npx","args":["-y","@xuzan/xz-mcp"],"env":{}}'
 ```
 
 ### 优点
@@ -241,7 +241,7 @@ git push origin v1.0.1
 3. **发布到 NPM**（可选）：
    - 创建 Node.js 包装器
    - 发布到 npm registry
-   - 用户可以通过 `npx @xuzan/xz-mcp` 直接使用
+   - 用户可以通过 `npx -y @xuzan/xz-mcp` 直接使用
 
 ---
 
