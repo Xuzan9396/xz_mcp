@@ -1,9 +1,13 @@
 #!/bin/bash
 
 # XZ MCP 编译和安装脚本
-# 用法: ./build.sh
+# 用法: ./build.sh [version]
+# 示例: ./build.sh v1.0.0
 
 set -e  # 遇到错误立即退出
+
+# 获取版本号参数，默认为 dev
+VERSION=${1:-dev}
 
 # 颜色定义
 RED='\033[0;31m'
@@ -26,8 +30,8 @@ rm -f xz_mcp
 echo -e "${YELLOW}[2/5]${NC} 下载依赖..."
 go mod tidy
 
-echo -e "${YELLOW}[3/5]${NC} 编译项目..."
-go build -ldflags "-s -w" -o xz_mcp main.go
+echo -e "${YELLOW}[3/5]${NC} 编译项目 (版本: ${VERSION})..."
+go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
 
 echo -e "${YELLOW}[4/5]${NC} 设置执行权限..."
 chmod +x xz_mcp

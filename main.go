@@ -21,8 +21,11 @@ import (
 )
 
 const (
-	ServerName    = "XZ MCP Unified Database Server"
-	ServerVersion = "1.0.0"
+	ServerName = "XZ MCP Database Server"
+)
+
+var (
+	ServerVersion = "dev" // 将在编译时通过 ldflags 注入实际版本
 )
 
 var (

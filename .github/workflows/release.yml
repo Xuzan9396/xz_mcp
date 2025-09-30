@@ -36,8 +36,9 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 1
         run: |
+          VERSION=${GITHUB_REF#refs/tags/}
           go mod tidy
-          go build -ldflags "-s -w" -o ${{ matrix.name }} main.go
+          go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o ${{ matrix.name }} main.go
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -74,8 +75,9 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
         run: |
+          VERSION=${GITHUB_REF#refs/tags/}
           go mod tidy
-          go build -ldflags "-s -w" -o ${{ matrix.name }} main.go
+          go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o ${{ matrix.name }} main.go
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -107,8 +109,9 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
         run: |
+          $VERSION = $env:GITHUB_REF -replace 'refs/tags/', ''
           go mod tidy
-          go build -ldflags "-s -w" -o ${{ matrix.name }} main.go
+          go build -ldflags "-s -w -X main.ServerVersion=$VERSION" -o ${{ matrix.name }} main.go
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
