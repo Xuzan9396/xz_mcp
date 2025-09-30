@@ -1,6 +1,6 @@
 {
   "name": "@xuzan/xz-mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "xz_mcp MCP server for MySQL, PostgreSQL, Redis, and SQLite databases",
   "main": "index.js",
   "bin": {

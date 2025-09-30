@@ -183,8 +183,8 @@ npm whoami
 ```bash
 # 1. 确保 xz_mcp 已发布到 GitHub
 cd /Users/admin/go/empty/go/mcp_server/xz_mcp
-git tag -a v1.0.0 -m "Release v1.0.0"
-git push origin v1.0.0
+git tag -a v1.0.4 -m "Release v1.0.4"
+git push origin v1.0.4
 
 # 2. 等待 GitHub Actions 完成编译和发布
 
@@ -198,8 +198,10 @@ npm login
 npm install
 node bin/xz-mcp.js
 
-# 查看包信息
-npm view @xuzan/xz-mcp
+
+# 查看将要发布的文件
+npm pack --dry-run
+
 
 #小版本发布
 npm version patch
@@ -207,8 +209,17 @@ npm version patch
 # 6. 发布到 npm
 npm publish --access public
 
+非首次:
+npm publish
+
 # 7. 验证
 npx @xuzan/xz-mcp
+
+# 8.查看版本
+ npm view @xuzan/xz-mcp version
+
+ # 查看包信息
+npm view @xuzan/xz-mcp
 ```
 
 完成！用户现在可以通过 `npx @xuzan/xz-mcp` 直接使用你的 MCP 服务器了！
