@@ -1,0 +1,127 @@
+name: Release XZ MCP
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # 当推送 v1.0.0 这样的标签时触发
+  workflow_dispatch:  # 允许手动触发
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          # macOS
+          - goos: darwin
+            goarch: amd64
+            name: xz_mcp_darwin_amd64
+          - goos: darwin
+            goarch: arm64
+            name: xz_mcp_darwin_arm64
+
+          # Linux
+          - goos: linux
+            goarch: amd64
+            name: xz_mcp_linux_amd64
+          - goos: linux
+            goarch: arm64
+            name: xz_mcp_linux_arm64
+
+          # Windows
+          - goos: windows
+            goarch: amd64
+            name: xz_mcp_windows_amd64.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 1
+        run: |
+          # 安装交叉编译工具
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            sudo apt-get update
+            sudo apt-get install -y gcc-mingw-w64
+          fi
+
+          go mod tidy
+          go build -ldflags "-s -w" -o ${{ matrix.name }} main.go
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.name }}
+
+  create-release:
+    name: Create Release
+    needs: build-and-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Display structure
+        run: ls -R ./artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./artifacts/*/*
+          body: |
+            ## XZ MCP - 统一数据库 MCP 服务器
+
+            ### 🚀 快速安装
+
+            **macOS (Apple Silicon)**:
+            ```bash
+            curl -L https://github.com/Xuzan9396/xz_mcp/releases/latest/download/xz_mcp_darwin_arm64 -o xz_mcp
+            chmod +x xz_mcp
+            mv xz_mcp /Users/admin/go/bin/
+            ```
+
+            **macOS (Intel)**:
+            ```bash
+            curl -L https://github.com/Xuzan9396/xz_mcp/releases/latest/download/xz_mcp_darwin_amd64 -o xz_mcp
+            chmod +x xz_mcp
+            mv xz_mcp /Users/admin/go/bin/
+            ```
+
+            **Linux (amd64)**:
+            ```bash
+            curl -L https://github.com/Xuzan9396/xz_mcp/releases/latest/download/xz_mcp_linux_amd64 -o xz_mcp
+            chmod +x xz_mcp
+            sudo mv xz_mcp /usr/local/bin/
+            ```
+
+            ### 📦 集成的数据库
+            - MySQL (14个工具)
+            - PostgreSQL (3个工具)
+            - Redis (17个工具)
+            - SQLite (1个工具)
+
+            ### 📖 使用文档
+            查看 [README.md](https://github.com/Xuzan9396/xz_mcp/blob/main/README.md)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
