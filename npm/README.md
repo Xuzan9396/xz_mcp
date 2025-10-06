@@ -61,13 +61,11 @@ npm install @xuzan/xz-mcp
 - Windows (x64 / ARM64)
 
 ## 更多信息
-# 1. 提交所有改动
-git add .
-git commit -m "feat: 简化 Redis 工具，新增多平台支持和 NPM 发布"
 
-# 2. 推送到 GitHub
-git push
+- 📖 [完整文档](https://github.com/Xuzan9396/xz_mcp)
+- 🐛 [问题反馈](https://github.com/Xuzan9396/xz_mcp/issues)
+- 📝 [更新日志](https://github.com/Xuzan9396/xz_mcp/releases)
 
-# 3. 创建并推送新标签（这会触发 GitHub Actions）
-git tag v1.0.5
-git push origin v1.0.5
+## License
+
+MIT
