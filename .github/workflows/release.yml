@@ -323,17 +323,11 @@ jobs:
           # 更新 package.json 版本
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
 
-          # 复制根目录的 .npmrc 到当前目录
-          if [ -f ../.npmrc ]; then
-            cp ../.npmrc .
-          fi
-
           cat package.json
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM
-        working-directory: npm-package
-        run: npm publish --access public
+        run: |
+          cd npm-package
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
