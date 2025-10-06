@@ -324,15 +324,12 @@ jobs:
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
 
           cat package.json
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM
         run: |
           cd npm-package
-
-          # 验证认证
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-
-          # 发布
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
