@@ -10,29 +10,29 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 
 - ✅ **统一接口** - 一个服务器集成 4 种数据库
 - ✅ **标准协议** - 完全兼容 MCP 协议规范
-- ✅ **独立工具** - 21 个数据库操作工具，命名空间隔离
+- ✅ **独立工具** - 15 个数据库操作工具，命名空间隔离
 - ✅ **生产就绪** - 包含错误恢复、连接管理等生产特性
 
 ## 📦 集成的数据库
 
 | 数据库 | 工具数量 | 主要功能 |
 |--------|---------|---------|
-| **MySQL** | 14 | 连接管理、查询执行、表管理、存储过程 |
+| **MySQL** | 8 | 连接管理、查询执行、存储过程 |
 | **PostgreSQL** | 3 | 连接管理、查询执行、DML 操作 |
 | **Redis** | 3 | 连接管理、通用命令执行、Lua 脚本 |
 | **SQLite** | 1 | 统一查询接口（SELECT/DML） |
-| **总计** | **21** | - |
+| **总计** | **15** | - |
 
 ## 🛠️ 工具列表
 
-### MySQL 工具 (14个)
+### MySQL 工具 (8个)
 
 #### 连接管理
 - `mysql_connect` - 连接到 MySQL 数据库
 
 #### 查询执行
-- `mysql_query` - 执行 SELECT 查询
-- `mysql_exec` - 执行 INSERT/UPDATE/DELETE
+- `mysql_query` - 执行查询操作（SELECT/SHOW/DESCRIBE 等）
+- `mysql_exec` - 执行 DML/DDL 操作（INSERT/UPDATE/DELETE/CREATE TABLE/ALTER TABLE/DROP TABLE 等）
 - `mysql_exec_get_id` - 执行 INSERT 并返回自增 ID
 
 #### 存储过程
@@ -40,14 +40,6 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 - `mysql_create_procedure` - 创建存储过程
 - `mysql_drop_procedure` - 删除存储过程
 - `mysql_show_procedures` - 列出所有存储过程
-
-#### 表管理
-- `mysql_create_table` - 创建表
-- `mysql_alter_table` - 修改表结构
-- `mysql_drop_table` - 删除表
-- `mysql_show_tables` - 列出所有表
-- `mysql_describe_table` - 查看表结构
-- `mysql_show_create_table` - 查看建表语句
 
 ### PostgreSQL 工具 (3个)
 
@@ -513,11 +505,25 @@ sudo apt-get install build-essential
 
 ## 🔄 版本历史
 
+### v1.1.0 (2025-10-06)
+
+- 🎯 **简化工具** - 合并 MySQL 表管理工具到 `mysql_exec` 和 `mysql_query`
+- ✅ 工具数量从 21 个优化到 15 个
+- ✅ 保持相同功能，更简洁的 API
+
+**迁移说明**：
+- `mysql_create_table` → `mysql_exec` (如: `CREATE TABLE ...`)
+- `mysql_alter_table` → `mysql_exec` (如: `ALTER TABLE ...`)
+- `mysql_drop_table` → `mysql_exec` (如: `DROP TABLE ...`)
+- `mysql_show_tables` → `mysql_query` (如: `SHOW TABLES`)
+- `mysql_describe_table` → `mysql_query` (如: `DESCRIBE table_name`)
+- `mysql_show_create_table` → `mysql_query` (如: `SHOW CREATE TABLE table_name`)
+
 ### v1.0.0 (2025-09-30)
 
 - ✨ 初始版本发布
 - ✅ 集成 MySQL、PostgreSQL、Redis、SQLite
-- ✅ 实现 35 个数据库操作工具
+- ✅ 实现 15 个数据库操作工具
 - ✅ 完整的错误处理和连接管理
 - ✅ 生产就绪的代码质量
 

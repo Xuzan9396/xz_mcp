@@ -223,3 +223,22 @@ npm view @xuzan/xz-mcp
 ```
 
 完成！用户现在可以通过 `npx -y @xuzan/xz-mcp` 直接使用你的 MCP 服务器了！
+
+
+
+1. 获取 npm access token：
+   - 访问：https://www.npmjs.com/settings/xuzan/tokens
+   - 点击 "Generate New Token" → "Classic Token"
+   - 选择 "Automation" 类型
+   - 复制生成的 token
+2. 在 GitHub 中添加 secret：
+   - 访问：https://github.com/Xuzan9396/xz_mcp/settings/secrets/actions
+   - 点击 "New repository secret"
+   - Name: NPM_TOKEN
+   - Secret: 粘贴你刚才复制的 npm token
+   - 点击 "Add secret"
+3. 重新触发 workflow：
+   git tag -d v1.0.9
+   git push origin :refs/tags/v1.0.9
+   git tag v1.0.9
+   git push origin v1.0.9

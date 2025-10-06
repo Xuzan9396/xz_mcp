@@ -77,8 +77,8 @@ func registerMySQLTools(s *server.MCPServer) {
 	// 2. mysql_query
 	s.AddTool(
 		mcp.NewTool("mysql_query",
-			mcp.WithDescription("Execute MySQL SELECT query"),
-			mcp.WithString("sql", mcp.Required(), mcp.Description("SQL SELECT query to execute")),
+			mcp.WithDescription("Execute MySQL query operations (SELECT/SHOW/DESCRIBE, etc.)"),
+			mcp.WithString("sql", mcp.Required(), mcp.Description("SQL query to execute")),
 			mcp.WithArray("args", mcp.Description("Query parameters for prepared statement")),
 		),
 		handleMySQLQuery,
@@ -87,8 +87,8 @@ func registerMySQLTools(s *server.MCPServer) {
 	// 3. mysql_exec
 	s.AddTool(
 		mcp.NewTool("mysql_exec",
-			mcp.WithDescription("Execute MySQL INSERT/UPDATE/DELETE operations"),
-			mcp.WithString("sql", mcp.Required(), mcp.Description("SQL DML statement to execute")),
+			mcp.WithDescription("Execute MySQL DML/DDL operations (INSERT/UPDATE/DELETE/CREATE TABLE/ALTER TABLE/DROP TABLE, etc.)"),
+			mcp.WithString("sql", mcp.Required(), mcp.Description("SQL statement to execute")),
 			mcp.WithArray("args", mcp.Description("Query parameters for prepared statement")),
 		),
 		handleMySQLExec,
@@ -141,58 +141,6 @@ func registerMySQLTools(s *server.MCPServer) {
 		handleMySQLShowProcedures,
 	)
 
-	// 9. mysql_create_table
-	s.AddTool(
-		mcp.NewTool("mysql_create_table",
-			mcp.WithDescription("Create MySQL table"),
-			mcp.WithString("create_sql", mcp.Required(), mcp.Description("Complete CREATE TABLE SQL statement")),
-		),
-		handleMySQLCreateTable,
-	)
-
-	// 10. mysql_alter_table
-	s.AddTool(
-		mcp.NewTool("mysql_alter_table",
-			mcp.WithDescription("Alter MySQL table structure"),
-			mcp.WithString("alter_sql", mcp.Required(), mcp.Description("Complete ALTER TABLE SQL statement")),
-		),
-		handleMySQLAlterTable,
-	)
-
-	// 11. mysql_drop_table
-	s.AddTool(
-		mcp.NewTool("mysql_drop_table",
-			mcp.WithDescription("Drop MySQL table"),
-			mcp.WithString("table_name", mcp.Required(), mcp.Description("Name of the table to drop")),
-		),
-		handleMySQLDropTable,
-	)
-
-	// 12. mysql_show_tables
-	s.AddTool(
-		mcp.NewTool("mysql_show_tables",
-			mcp.WithDescription("Show list of tables in the current database"),
-		),
-		handleMySQLShowTables,
-	)
-
-	// 13. mysql_describe_table
-	s.AddTool(
-		mcp.NewTool("mysql_describe_table",
-			mcp.WithDescription("Describe MySQL table structure"),
-			mcp.WithString("table_name", mcp.Required(), mcp.Description("Name of the table to describe")),
-		),
-		handleMySQLDescribeTable,
-	)
-
-	// 14. mysql_show_create_table
-	s.AddTool(
-		mcp.NewTool("mysql_show_create_table",
-			mcp.WithDescription("Show CREATE TABLE statement for a table"),
-			mcp.WithString("table_name", mcp.Required(), mcp.Description("Name of the table to show CREATE statement for")),
-		),
-		handleMySQLShowCreateTable,
-	)
 }
 
 // handleMySQLConnect MySQL连接处理器
@@ -390,104 +338,6 @@ func handleMySQLShowProcedures(ctx context.Context, request mcp.CallToolRequest)
 	result, err := mysql_db.ShowProcedures(databaseName)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Show procedures failed: %v", err)), nil
-	}
-	jsonData, _ := json.MarshalIndent(result, "", "  ")
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// handleMySQLCreateTable 创建表处理器
-func handleMySQLCreateTable(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !mysql_db.IsConnected() {
-		return mcp.NewToolResultError("Database not connected. Use mysql_connect first"), nil
-	}
-	createSQL, err := request.RequireString("create_sql")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	result, err := mysql_db.CreateTable(createSQL)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Create table failed: %v", err)), nil
-	}
-	jsonData, _ := json.MarshalIndent(result, "", "  ")
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// handleMySQLAlterTable 修改表结构处理器
-func handleMySQLAlterTable(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !mysql_db.IsConnected() {
-		return mcp.NewToolResultError("Database not connected. Use mysql_connect first"), nil
-	}
-	alterSQL, err := request.RequireString("alter_sql")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	result, err := mysql_db.AlterTable(alterSQL)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Alter table failed: %v", err)), nil
-	}
-	jsonData, _ := json.MarshalIndent(result, "", "  ")
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// handleMySQLDropTable 删除表处理器
-func handleMySQLDropTable(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !mysql_db.IsConnected() {
-		return mcp.NewToolResultError("Database not connected. Use mysql_connect first"), nil
-	}
-	tableName, err := request.RequireString("table_name")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	result, err := mysql_db.DropTable(tableName)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Drop table failed: %v", err)), nil
-	}
-	jsonData, _ := json.MarshalIndent(result, "", "  ")
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// handleMySQLShowTables 显示表列表处理器
-func handleMySQLShowTables(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !mysql_db.IsConnected() {
-		return mcp.NewToolResultError("Database not connected. Use mysql_connect first"), nil
-	}
-	result, err := mysql_db.ShowTables()
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Show tables failed: %v", err)), nil
-	}
-	jsonData, _ := json.MarshalIndent(result, "", "  ")
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// handleMySQLDescribeTable 描述表结构处理器
-func handleMySQLDescribeTable(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !mysql_db.IsConnected() {
-		return mcp.NewToolResultError("Database not connected. Use mysql_connect first"), nil
-	}
-	tableName, err := request.RequireString("table_name")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	result, err := mysql_db.DescribeTable(tableName)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Describe table failed: %v", err)), nil
-	}
-	jsonData, _ := json.MarshalIndent(result, "", "  ")
-	return mcp.NewToolResultText(string(jsonData)), nil
-}
-
-// handleMySQLShowCreateTable 显示建表语句处理器
-func handleMySQLShowCreateTable(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !mysql_db.IsConnected() {
-		return mcp.NewToolResultError("Database not connected. Use mysql_connect first"), nil
-	}
-	tableName, err := request.RequireString("table_name")
-	if err != nil {
-		return mcp.NewToolResultError(err.Error()), nil
-	}
-	result, err := mysql_db.ShowCreateTable(tableName)
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Show create table failed: %v", err)), nil
 	}
 	jsonData, _ := json.MarshalIndent(result, "", "  ")
 	return mcp.NewToolResultText(string(jsonData)), nil
