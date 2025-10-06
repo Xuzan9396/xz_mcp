@@ -305,7 +305,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Prepare NPM package
         run: |
@@ -323,27 +322,16 @@ jobs:
           # 更新 package.json 版本
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
 
-          cat package.json
+          # 在 npm-package 目录创建 .npmrc
+          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
 
-      - name: Debug NPM config
-        run: |
-          echo "=== Root directory .npmrc ==="
-          cat .npmrc || echo "No .npmrc in root"
-          echo ""
-          echo "=== npm-package directory ==="
-          ls -la npm-package/
-          echo ""
-          echo "=== Check npm config ==="
-          npm config list
+          cat package.json
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_XZ_TOKEN }}
 
       - name: Publish to NPM
         run: |
           cd npm-package
-          # 复制根目录的 .npmrc
-          if [ -f ../.npmrc ]; then
-            cp ../.npmrc .
-            echo "✓ Copied .npmrc to npm-package"
-          fi
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_XZ_TOKEN }}
