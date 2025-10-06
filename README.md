@@ -10,7 +10,7 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 
 - ✅ **统一接口** - 一个服务器集成 4 种数据库
 - ✅ **标准协议** - 完全兼容 MCP 协议规范
-- ✅ **独立工具** - 35 个数据库操作工具，命名空间隔离
+- ✅ **独立工具** - 21 个数据库操作工具，命名空间隔离
 - ✅ **生产就绪** - 包含错误恢复、连接管理等生产特性
 
 ## 📦 集成的数据库
@@ -19,9 +19,9 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 |--------|---------|---------|
 | **MySQL** | 14 | 连接管理、查询执行、表管理、存储过程 |
 | **PostgreSQL** | 3 | 连接管理、查询执行、DML 操作 |
-| **Redis** | 17 | 连接管理、所有数据类型操作、Lua 脚本 |
+| **Redis** | 3 | 连接管理、通用命令执行、Lua 脚本 |
 | **SQLite** | 1 | 统一查询接口（SELECT/DML） |
-| **总计** | **35** | - |
+| **总计** | **21** | - |
 
 ## 🛠️ 工具列表
 
@@ -55,33 +55,14 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 - `pgsql_query` - 执行 SELECT 查询
 - `pgsql_exec` - 执行 INSERT/UPDATE/DELETE 操作
 
-### Redis 工具 (17个)
+### Redis 工具 (3个)
 
 #### 连接管理
-- `redis_connect` - 连接到 Redis
-- `redis_disconnect` - 断开连接
-- `redis_ping` - 测试连接
+- `redis_connect` - 连接到 Redis 服务器
 
 #### 通用操作
 - `redis_command` - 执行任意 Redis 命令
 - `redis_lua` - 执行 Lua 脚本
-- `redis_info` - 获取服务器信息
-
-#### 键管理
-- `redis_keys` - 获取匹配模式的键
-- `redis_key_info` - 获取键详细信息
-- `redis_del` - 删除键
-- `redis_expire` - 设置过期时间
-
-#### 数据类型操作
-- `redis_string` - 字符串操作 (SET/GET/INCR/DECR/MGET/MSET)
-- `redis_hash` - 哈希操作 (HSET/HGET/HGETALL/HDEL)
-- `redis_list` - 列表操作 (LPUSH/RPUSH/LPOP/RPOP/LRANGE)
-- `redis_set` - 集合操作 (SADD/SMEMBERS/SREM/SISMEMBER)
-- `redis_zset` - 有序集合操作 (ZADD/ZRANGE/ZREM/ZSCORE)
-
-#### 数据库管理
-- `redis_db` - 数据库操作 (DBSIZE/FLUSHDB/FLUSHALL)
 
 ### SQLite 工具 (1个)
 
@@ -273,7 +254,7 @@ npm install -g @modelcontextprotocol/inspector
 mcp-inspector /Users/admin/go/bin/xz_mcp
 ```
 
-浏览器会自动打开调试界面，可以测试所有 35 个工具。
+浏览器会自动打开调试界面，可以测试所有 21 个工具。
 
 ## 💡 使用示例
 
@@ -346,21 +327,29 @@ mcp-inspector /Users/admin/go/bin/xz_mcp
   }
 }
 
-// 2. 字符串操作
+// 2. 执行任意 Redis 命令
 {
-  "tool": "redis_string",
+  "tool": "redis_command",
   "arguments": {
-    "operation": "SET",
-    "key": "user:1",
-    "value": "张三"
+    "command": "SET user:1 张三"
   }
 }
 
-// 3. 获取键列表
+// 3. 执行复杂命令
 {
-  "tool": "redis_keys",
+  "tool": "redis_command",
   "arguments": {
-    "pattern": "user:*"
+    "command": "HSET user:1 name 张三 age 30"
+  }
+}
+
+// 4. 执行 Lua 脚本
+{
+  "tool": "redis_lua",
+  "arguments": {
+    "script": "return redis.call('GET', KEYS[1])",
+    "keys": ["user:1"],
+    "args": []
   }
 }
 ```

@@ -1,0 +1,29 @@
+# 源代码
+*.go
+go.mod
+go.sum
+
+# 测试文件
+test_*
+*_test.go
+
+# 开发文件
+.git/
+.github/
+.vscode/
+.idea/
+
+# 临时文件
+*.log
+*.tmp
+.DS_Store
+
+# 不需要的目录
+db/
+internal/
+cmd/
+docs/
+
+# 二进制文件（安装时下载）
+bin/xz-mcp
+bin/xz-mcp.exe

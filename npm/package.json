@@ -1,30 +1,36 @@
 {
   "name": "@xuzan/xz-mcp",
-  "version": "1.0.4",
-  "description": "xz_mcp MCP server for MySQL, PostgreSQL, Redis, and SQLite databases",
+  "version": "0.0.1",
+  "description": "XZ MCP - 统一数据库 MCP 服务器（MySQL, PostgreSQL, Redis, SQLite）",
   "main": "index.js",
   "bin": {
     "xz-mcp": "./bin/xz-mcp.js"
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js"
+    "postinstall": "node install.js",
+    "test": "node bin/xz-mcp.js --version"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
+    "database",
     "mysql",
     "postgresql",
     "redis",
     "sqlite",
-    "database",
-    "mcp-server"
+    "unified-database",
+    "golang"
   ],
-  "author": "Xuzan",
+  "author": "Xuzan <xuzan9396@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Xuzan9396/xz_mcp.git"
   },
-  "homepage": "https://github.com/Xuzan9396/xz_mcp",
+  "homepage": "https://github.com/Xuzan9396/xz_mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Xuzan9396/xz_mcp/issues"
+  },
   "engines": {
     "node": ">=14.0.0"
   },

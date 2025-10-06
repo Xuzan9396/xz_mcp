@@ -10,17 +10,10 @@ permissions:
   contents: write
 
 jobs:
-  build-macos:
-    name: Build macOS
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        include:
-          - goarch: amd64
-            name: xz_mcp_darwin_amd64
-          - goarch: arm64
-            name: xz_mcp_darwin_arm64
-
+  # macOS arm64 编译任务（Apple Silicon）
+  build-macos-arm64:
+    name: Build macOS ARM64
+    runs-on: macos-latest  # macos-latest 是 arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,30 +24,62 @@ jobs:
           go-version: '1.21'
 
       - name: Build
-        env:
-          GOOS: darwin
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 1
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          go mod tidy
-          go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o ${{ matrix.name }} main.go
+          echo "Building for macOS arm64 - Version: $VERSION"
+
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+
+          # 重命名
+          mv xz_mcp xz_mcp_darwin_arm64
+
+          # 验证
+          file xz_mcp_darwin_arm64
+          ls -lh xz_mcp_darwin_arm64
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
-          path: ${{ matrix.name }}
+          name: xz_mcp_darwin_arm64
+          path: xz_mcp_darwin_arm64
 
-  build-linux:
-    name: Build Linux
+  # macOS amd64 编译任务（Intel）
+  build-macos-amd64:
+    name: Build macOS AMD64
+    runs-on: macos-13  # macos-13 是 x86_64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Building for macOS amd64 - Version: $VERSION"
+
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+
+          # 重命名
+          mv xz_mcp xz_mcp_darwin_amd64
+
+          # 验证
+          file xz_mcp_darwin_amd64
+          ls -lh xz_mcp_darwin_amd64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: xz_mcp_darwin_amd64
+          path: xz_mcp_darwin_amd64
+
+  # Linux 编译任务（amd64）
+  build-linux-amd64:
+    name: Build Linux AMD64
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goarch: amd64
-            name: xz_mcp_linux_amd64
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,36 +89,30 @@ jobs:
         with:
           go-version: '1.21'
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc libc6-dev
-
       - name: Build
-        env:
-          GOOS: linux
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
-          go mod tidy
-          go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o ${{ matrix.name }} main.go
+          echo "Building for Linux amd64 - Version: $VERSION"
+
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+
+          # 重命名
+          mv xz_mcp xz_mcp_linux_amd64
+
+          # 验证
+          file xz_mcp_linux_amd64
+          ls -lh xz_mcp_linux_amd64
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
-          path: ${{ matrix.name }}
+          name: xz_mcp_linux_amd64
+          path: xz_mcp_linux_amd64
 
-  build-windows:
-    name: Build Windows
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        include:
-          - goarch: amd64
-            name: xz_mcp_windows_amd64.exe
-
+  # Windows 编译任务（amd64）
+  build-windows-amd64:
+    name: Build Windows AMD64
+    runs-on: ubuntu-latest  # 交叉编译
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -104,24 +123,62 @@ jobs:
           go-version: '1.21'
 
       - name: Build
-        env:
-          GOOS: windows
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
         run: |
-          $VERSION = $env:GITHUB_REF -replace 'refs/tags/', ''
-          go mod tidy
-          go build -ldflags "-s -w -X main.ServerVersion=$VERSION" -o ${{ matrix.name }} main.go
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Building for Windows amd64 - Version: $VERSION"
+
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp.exe main.go
+
+          # 重命名
+          mv xz_mcp.exe xz_mcp_windows_amd64.exe
+
+          # 验证
+          file xz_mcp_windows_amd64.exe
+          ls -lh xz_mcp_windows_amd64.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.name }}
-          path: ${{ matrix.name }}
+          name: xz_mcp_windows_amd64
+          path: xz_mcp_windows_amd64.exe
 
+  # Windows 编译任务（arm64）
+  build-windows-arm64:
+    name: Build Windows ARM64
+    runs-on: ubuntu-latest  # 交叉编译
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "Building for Windows arm64 - Version: $VERSION"
+
+          GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp.exe main.go
+
+          # 重命名
+          mv xz_mcp.exe xz_mcp_windows_arm64.exe
+
+          # 验证
+          file xz_mcp_windows_arm64.exe
+          ls -lh xz_mcp_windows_arm64.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: xz_mcp_windows_arm64
+          path: xz_mcp_windows_arm64.exe
+
+  # 创建 GitHub Release 并发布到 NPM
   create-release:
-    name: Create Release
-    needs: [build-macos, build-linux, build-windows]
+    name: Create Release and Publish NPM
+    needs: [build-macos-arm64, build-macos-amd64, build-linux-amd64, build-windows-amd64, build-windows-arm64]
     runs-on: ubuntu-latest
 
     steps:
@@ -136,21 +193,63 @@ jobs:
       - name: Display structure
         run: ls -R ./artifacts
 
+      - name: Prepare release assets
+        run: |
+          mkdir -p release
+          cp artifacts/xz_mcp_darwin_arm64/xz_mcp_darwin_arm64 release/
+          cp artifacts/xz_mcp_darwin_amd64/xz_mcp_darwin_amd64 release/
+          cp artifacts/xz_mcp_linux_amd64/xz_mcp_linux_amd64 release/
+          cp artifacts/xz_mcp_windows_amd64/xz_mcp_windows_amd64.exe release/
+          cp artifacts/xz_mcp_windows_arm64/xz_mcp_windows_arm64.exe release/
+
+          # 设置执行权限
+          chmod +x release/xz_mcp_darwin_*
+          chmod +x release/xz_mcp_linux_*
+
+          ls -lh release/
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./artifacts/*/*
+          files: release/*
           body: |
             ## XZ MCP - 统一数据库 MCP 服务器
 
-            ### 🚀 快速安装
+            ### 🚀 快速安装（推荐）
 
-            **一键安装脚本（推荐）**:
+            **使用 npx（无需 Go 环境）**:
             ```bash
-            curl -fsSL https://raw.githubusercontent.com/Xuzan9396/xz_mcp/main/install.sh | bash
+            npx -y @xuzan/xz-mcp
             ```
 
-            **手动下载**:
+            **配置到 Claude Desktop**:
+            ```json
+            {
+              "mcpServers": {
+                "xz-mcp": {
+                  "command": "npx",
+                  "args": ["-y", "@xuzan/xz-mcp"]
+                }
+              }
+            }
+            ```
+
+            ### 📦 支持的平台
+
+            本次发布包含以下平台的二进制文件：
+
+            **macOS**:
+            - ✅ Apple Silicon (ARM64): `xz_mcp_darwin_arm64`
+            - ✅ Intel (AMD64): `xz_mcp_darwin_amd64`
+
+            **Linux**:
+            - ✅ x64 (AMD64): `xz_mcp_linux_amd64`
+
+            **Windows**:
+            - ✅ x64 (AMD64): `xz_mcp_windows_amd64.exe`
+            - ✅ ARM64: `xz_mcp_windows_arm64.exe`
+
+            ### 🔧 手动下载安装
 
             **macOS (Apple Silicon)**:
             ```bash
@@ -173,26 +272,62 @@ jobs:
             sudo mv xz_mcp /usr/local/bin/
             ```
 
-            ### 🔧 配置
+            **Windows (amd64)**:
+            下载 `xz_mcp_windows_amd64.exe` 并放置到 PATH 环境变量目录中
 
-            **Codex** (`~/.codex/config.toml`):
-            ```toml
-            [mcp_servers.xz_mcp]
-            command = "/Users/admin/go/bin/xz_mcp"
+            ### ✨ 集成的数据库
+
+            - ✅ **MySQL** - 14个工具（连接、查询、表管理、存储过程）
+            - ✅ **PostgreSQL** - 3个工具（连接、查询、DML操作）
+            - ✅ **Redis** - 3个工具（连接、命令执行、Lua脚本）
+            - ✅ **SQLite** - 1个工具（统一查询接口）
+
+            ### 📖 使用说明
+
+            在 Claude Desktop 或 Codex 中直接对话：
+            ```
+            连接到我的 MySQL 数据库
+            查询 Redis 中的所有键
+            执行 PostgreSQL 查询
             ```
 
-            **Claude Desktop**:
-            ```bash
-            claude mcp add-json xz_mcp -s user '{"type":"stdio","command":"/Users/admin/go/bin/xz_mcp","args":[],"env":{}}'
-            ```
+            ### 📚 完整文档
 
-            ### 📦 集成的数据库
-            - ✅ MySQL (14个工具)
-            - ✅ PostgreSQL (3个工具)
-            - ✅ Redis (17个工具)
-            - ✅ SQLite (1个工具)
+            查看 [README.md](https://github.com/Xuzan9396/xz_mcp/blob/main/README.md) 了解更多信息。
 
-            ### 📖 完整文档
-            查看 [README.md](https://github.com/Xuzan9396/xz_mcp/blob/main/README.md) 和 [DEPLOYMENT.md](https://github.com/Xuzan9396/xz_mcp/blob/main/DEPLOYMENT.md)
+            ### 🐛 问题反馈
+
+            如有问题，请在 [GitHub Issues](https://github.com/Xuzan9396/xz_mcp/issues) 中反馈。
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Prepare NPM package
+        run: |
+          # 复制 npm 目录
+          cp -r npm npm-package
+          cd npm-package
+
+          # 创建 bin 目录
+          mkdir -p bin
+
+          # 获取版本号（去掉 v 前缀）
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "NPM Version: $VERSION"
+
+          # 更新 package.json 版本
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+
+          cat package.json
+
+      - name: Publish to NPM
+        run: |
+          cd npm-package
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
