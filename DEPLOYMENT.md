@@ -50,10 +50,10 @@ git push origin v1.0.0
 
 
   # 1. 提交所有改动
-  git add . && git commit -m "redis,mysql" && git push 
+git add . && git commit -m "redis,mysql" && git push 
 
   # 3. 创建并推送新标签（这会触发 GitHub Actions）
-  git tag v1.0.6 && git push origin v1.0.6
+git tag v1.0.7 && git push origin v1.0.7
 ```
 
 2. **GitHub Actions 自动执行**：
