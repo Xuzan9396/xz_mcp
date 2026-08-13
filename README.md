@@ -1,6 +1,6 @@
 # XZ MCP - 统一数据库 MCP 服务器
 
-> 一个整合了 MySQL、PostgreSQL、Redis、SQLite 四种数据库的统一 MCP (Model Context Protocol) 服务器
+> 一个整合了 MySQL、PostgreSQL、Redis、SQLite、MongoDB 五种数据库的统一 MCP (Model Context Protocol) 服务器
 
 ## 🎯 项目简介
 
@@ -8,9 +8,9 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 
 ### 主要特性
 
-- ✅ **统一接口** - 一个服务器集成 4 种数据库
+- ✅ **统一接口** - 一个服务器集成 5 种数据库
 - ✅ **标准协议** - 完全兼容 MCP 协议规范
-- ✅ **独立工具** - 15 个数据库操作工具，命名空间隔离
+- ✅ **独立工具** - 19 个数据库操作工具，命名空间隔离
 - ✅ **生产就绪** - 包含错误恢复、连接管理等生产特性
 
 ## 📦 集成的数据库
@@ -21,7 +21,8 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 | **PostgreSQL** | 3 | 连接管理、查询执行、DML 操作 |
 | **Redis** | 3 | 连接管理、通用命令执行、Lua 脚本 |
 | **SQLite** | 1 | 统一查询接口（SELECT/DML） |
-| **总计** | **15** | - |
+| **MongoDB** | 4 | 动态连接、查询、聚合、原生命令（全权限） |
+| **总计** | **19** | - |
 
 ## 🛠️ 工具列表
 
@@ -59,6 +60,28 @@ XZ MCP 是一个基于 [mark3labs/mcp-go](https://github.com/mark3labs/mcp-go) �
 ### SQLite 工具 (1个)
 
 - `sqlite_query` - 执行 SQL 查询（支持 SELECT 和 DML）
+
+### MongoDB 工具 (4个)
+
+#### 连接管理
+- `mongo_connect` - 动态连接到 MongoDB。支持两种形态：传 `uri` 一整条连接串（含 `mongodb+srv://` 云集群），或分别传 `host`/`port`/`username`/`password`/`auth_source`。可选的 `database` 会成为后续操作的默认库
+
+#### 查询
+- `mongo_find` - 查询文档，支持 `filter`/`projection`/`sort`/`limit`/`skip`。`limit` 默认 100 条防止拉全表，显式传 `0` 表示不限制
+- `mongo_aggregate` - 执行聚合管道。含 `$out`/`$merge` 阶段时返回体会附带 `warning`
+
+#### 全权限操作
+- `mongo_command` - 执行任意 MongoDB 原生数据库命令，是**插入 / 更新 / 删除 / 建索引 / 库表管理 / 服务器管理**的统一入口
+
+> **BSON 参数格式**：`filter`、`projection`、`sort`、`pipeline`、`command` 均为 **Extended JSON 字符串**。
+> MongoDB 的 `_id` 默认是 `ObjectId` 类型，按 `_id` 查询必须写成 `{"_id":{"$oid":"68a1f2c9e1b2c3d4e5f60718"}}`；
+> 直接写字符串 `{"_id":"68a1f2..."}` 匹配不到任何文档。日期同理使用 `{"$date":"2026-01-01T00:00:00Z"}`。
+
+> **不可逆操作需确认**：`dropDatabase`（删库）、`drop`（删集合）、`shutdown`（停实例）属于结构级不可逆操作，
+> 必须同时传 `confirm: true` 才会执行。删数据（`delete`）、改数据（`update`）等数据级操作无需确认，直接执行。
+
+> **游标类命令自动取全量**：`listCollections`、`listIndexes` 等命令的响应是游标形式，
+> 普通执行只能拿到首批约 101 条；本工具会自动识别并取回全部结果，以 `{"results":[...],"count":N}` 返回。
 
 ## 🚀 安装与使用
 
@@ -246,7 +269,7 @@ npm install -g @modelcontextprotocol/inspector
 mcp-inspector /Users/admin/go/bin/xz_mcp
 ```
 
-浏览器会自动打开调试界面，可以测试所有 21 个工具。
+浏览器会自动打开调试界面，可以测试所有 19 个工具。
 
 ## 💡 使用示例
 
@@ -368,6 +391,125 @@ mcp-inspector /Users/admin/go/bin/xz_mcp
 }
 ```
 
+### MongoDB 示例
+
+```javascript
+// 1. 连接到 MongoDB —— 方式A：完整连接串（云集群 mongodb+srv:// 同样适用）
+{
+  "tool": "mongo_connect",
+  "arguments": {
+    "uri": "mongodb://root:password@127.0.0.1:27017/?authSource=admin",
+    "database": "shop"
+  }
+}
+
+// 1'. 连接到 MongoDB —— 方式B：分离字段
+{
+  "tool": "mongo_connect",
+  "arguments": {
+    "host": "127.0.0.1",
+    "port": 27017,
+    "username": "root",
+    "password": "password",
+    "auth_source": "admin",
+    "database": "shop"
+  }
+}
+
+// 2. 插入数据（写操作走 mongo_command 的原生命令，数据级操作无需确认）
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"insert\":\"users\",\"documents\":[{\"name\":\"张三\",\"age\":25},{\"name\":\"李四\",\"age\":31}]}"
+  }
+}
+// → {"n":2,"ok":1}
+
+// 3. 按 ObjectId 精确查询（注意 $oid，写成普通字符串查不到）
+{
+  "tool": "mongo_find",
+  "arguments": {
+    "collection": "users",
+    "filter": "{\"_id\":{\"$oid\":\"68a1f2c9e1b2c3d4e5f60718\"}}"
+  }
+}
+// → {"data":[{"_id":{"$oid":"68a1f2c9e1b2c3d4e5f60718"},"name":"张三","age":25}],"count":1}
+
+// 4. 排序 + 分页 + 字段投影
+{
+  "tool": "mongo_find",
+  "arguments": {
+    "collection": "users",
+    "filter": "{\"age\":{\"$gt\":18}}",
+    "sort": "{\"age\":-1}",
+    "projection": "{\"name\":1,\"_id\":0}",
+    "limit": 20,
+    "skip": 40
+  }
+}
+
+// 5. 聚合统计
+{
+  "tool": "mongo_aggregate",
+  "arguments": {
+    "collection": "users",
+    "pipeline": "[{\"$group\":{\"_id\":null,\"total\":{\"$sum\":1},\"avgAge\":{\"$avg\":\"$age\"}}}]"
+  }
+}
+// → {"data":[{"_id":null,"total":2,"avgAge":28}],"count":1}
+
+// 6. 更新数据
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"update\":\"users\",\"updates\":[{\"q\":{\"name\":\"张三\"},\"u\":{\"$set\":{\"age\":26}}}]}"
+  }
+}
+
+// 7. 创建索引
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"createIndexes\":\"users\",\"indexes\":[{\"key\":{\"email\":1},\"name\":\"idx_email\",\"unique\":true}]}"
+  }
+}
+
+// 8. 管理命令需指定 admin 库
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"listDatabases\":1}",
+    "database": "admin"
+  }
+}
+
+// 9. 删除数据 —— 数据级操作，无需 confirm
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"delete\":\"users\",\"deletes\":[{\"q\":{\"age\":{\"$lt\":18}},\"limit\":0}]}"
+  }
+}
+
+// 10. 删除集合 —— 结构级不可逆操作，必须传 confirm
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"drop\":\"users\"}"
+  }
+}
+// → 错误：该操作为不可逆的结构级操作（删除集合：drop），需人工确认。确认无误后，在参数中加入 confirm: true 重新调用。
+
+{
+  "tool": "mongo_command",
+  "arguments": {
+    "command": "{\"drop\":\"users\"}",
+    "confirm": true
+  }
+}
+// → {"ok":1,"nIndexesWas":2,"ns":"shop.users"}
+```
+
 ## 🏗️ 项目结构
 
 ```
@@ -375,11 +517,13 @@ xz_mcp/
 ├── main.go              # 主程序入口（2010行）
 ├── go.mod               # Go 模块定义
 ├── go.sum               # 依赖校验文件
+├── mongo_tools.go       # MongoDB 工具注册与处理函数
 ├── db/                  # 数据库连接模块
 │   ├── mysql_db/        # MySQL 连接管理
 │   ├── pgsql_db/        # PostgreSQL 连接管理
 │   ├── redis_db/        # Redis 连接管理
-│   └── sqlite_db/       # SQLite 连接管理
+│   ├── sqlite_db/       # SQLite 连接管理
+│   └── mongodb_db/      # MongoDB 连接管理
 ├── handlers/            # 工具处理器（预留）
 ├── tools/               # 工具定义（预留）
 ├── README.md            # 项目文档
@@ -395,18 +539,20 @@ xz_mcp/
   - PostgreSQL: `github.com/lib/pq`
   - Redis: `github.com/redis/go-redis/v9`
   - SQLite: `github.com/mattn/go-sqlite3`
+  - MongoDB: `go.mongodb.org/mongo-driver/v2`（官方驱动）
 
 ## 📝 开发说明
 
 ### 代码结构
 
-- **main.go**: 包含所有工具注册和处理函数
+- **main.go**: 包含 MySQL / PostgreSQL / Redis / SQLite 的工具注册和处理函数
+- **mongo_tools.go**: MongoDB 的工具注册和处理函数（独立成文件，避免 main.go 继续膨胀）
 - **db/*_db**: 各数据库的连接管理模块（从原独立项目复制）
-- **工具命名**: 使用前缀区分数据库（mysql_*, pgsql_*, redis_*, sqlite_*）
+- **工具命名**: 使用前缀区分数据库（mysql_*, pgsql_*, redis_*, sqlite_*, mongo_*）
 
 ### 添加新工具
 
-1. 在 `main.go` 中找到对应数据库的 `register*Tools` 函数
+1. 在 `main.go`（或 MongoDB 的 `mongo_tools.go`）中找到对应数据库的 `register*Tools` 函数
 2. 使用 `mcp.NewTool()` 定义新工具
 3. 使用 `s.AddTool()` 注册工具和处理函数
 4. 实现处理函数
@@ -504,6 +650,16 @@ sudo apt-get install build-essential
   - SQLite MCP: `/Users/admin/go/empty/go/mcp_server/sqlite`
 
 ## 🔄 版本历史
+
+### v1.2.0 (2026-08-13)
+
+- ✨ **新增 MongoDB 支持** - 集成官方驱动 `go.mongodb.org/mongo-driver/v2`，动态连接方式
+- ✅ 新增 4 个工具：`mongo_connect` / `mongo_find` / `mongo_aggregate` / `mongo_command`
+- ✅ 工具数量从 15 个增加到 19 个，集成数据库从 4 种增加到 5 种
+- 🔒 `dropDatabase` / `drop` / `shutdown` 等结构级不可逆操作需显式传 `confirm: true`
+- 🎯 BSON 参数采用 Extended JSON，支持按 `ObjectId`（`{"$oid":...}`）与日期（`{"$date":...}`）精确查询
+- 🎯 `mongo_find` 默认限 100 条防止拉全表（传 `limit: 0` 解除限制）
+- 🎯 `listCollections` / `listIndexes` 等游标类命令自动取回全量结果，不再截断在首批 101 条
 
 ### v1.1.0 (2025-10-06)
 

@@ -31,7 +31,7 @@ echo -e "${YELLOW}[2/5]${NC} 下载依赖..."
 go mod tidy
 
 echo -e "${YELLOW}[3/5]${NC} 编译项目 (版本: ${VERSION})..."
-go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+go build -ldflags "-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp .
 
 echo -e "${YELLOW}[4/5]${NC} 设置执行权限..."
 chmod +x xz_mcp

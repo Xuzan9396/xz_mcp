@@ -43,6 +43,7 @@ npm install @xuzan/xz-mcp
 - ✅ **PostgreSQL** - 3个工具（连接、查询、DML操作）
 - ✅ **Redis** - 3个工具（连接、命令执行、Lua脚本）
 - ✅ **SQLite** - 1个工具（统一查询接口）
+- ✅ **MongoDB** - 4个工具（动态连接、查询、聚合、原生命令全权限）
 
 ## 使用方法
 

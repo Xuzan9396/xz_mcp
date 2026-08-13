@@ -28,7 +28,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Building for macOS arm64 - Version: $VERSION"
 
-          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+          GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp .
 
           # 重命名
           mv xz_mcp xz_mcp_darwin_arm64
@@ -61,7 +61,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Building for macOS amd64 - Version: $VERSION"
 
-          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+          GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp .
 
           # 重命名
           mv xz_mcp xz_mcp_darwin_amd64
@@ -94,7 +94,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Building for Linux amd64 - Version: $VERSION"
 
-          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp main.go
+          GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp .
 
           # 重命名
           mv xz_mcp xz_mcp_linux_amd64
@@ -127,7 +127,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Building for Windows amd64 - Version: $VERSION"
 
-          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp.exe main.go
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp.exe .
 
           # 重命名
           mv xz_mcp.exe xz_mcp_windows_amd64.exe
@@ -160,7 +160,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "Building for Windows arm64 - Version: $VERSION"
 
-          GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp.exe main.go
+          GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w -X main.ServerVersion=${VERSION}" -o xz_mcp.exe .
 
           # 重命名
           mv xz_mcp.exe xz_mcp_windows_arm64.exe

@@ -34,3 +34,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.log
+# XZ Planning 测试凭据（含明文，勿提交）
+.xz_planning/**/tests/.env.local

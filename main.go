@@ -12,6 +12,7 @@ import (
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
+	"xz_mcp/db/mongodb_db"
 	"xz_mcp/db/mysql_db"
 	"xz_mcp/db/pgsql_db"
 	"xz_mcp/db/redis_db"
@@ -29,12 +30,13 @@ var (
 var (
 	pgClient    *pgsql_db.PgClient
 	redisClient *redis_db.RedisClient
+	mongoClient *mongodb_db.MongoClient
 )
 
 func main() {
 	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
 		fmt.Printf("%s v%s\n", ServerName, ServerVersion)
-		fmt.Println("Integrated: MySQL, PostgreSQL, Redis, SQLite")
+		fmt.Println("Integrated: MySQL, PostgreSQL, Redis, SQLite, MongoDB")
 		return
 	}
 
@@ -49,6 +51,7 @@ func main() {
 	registerPostgreSQLTools(s)
 	registerRedisTools(s)
 	registerSQLiteTools(s)
+	registerMongoTools(s)
 
 	log.Printf("Starting %s v%s...\n", ServerName, ServerVersion)
 	if err := server.ServeStdio(s); err != nil {
