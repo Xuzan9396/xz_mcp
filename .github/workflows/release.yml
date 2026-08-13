@@ -46,7 +46,7 @@ jobs:
   # macOS amd64 编译任务（Intel）
   build-macos-amd64:
     name: Build macOS AMD64
-    runs-on: macos-13  # macos-13 是 x86_64
+    runs-on: macos-latest  # macos-13(Intel) 已被 GitHub 退役；本项目 CGO_ENABLED=0，在 arm64 机器上交叉编译 amd64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
